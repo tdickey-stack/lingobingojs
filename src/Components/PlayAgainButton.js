@@ -3,12 +3,13 @@ import React from 'react';
 
 export default function PlayAgainButton(props) {
   return (
-    <div
-      className='p-1 m-2 rounded-4 themed-button enable-pointer highlight-button'
+    <button
+      className='button button-primary'
       data-theme={props.dataTheme}
+      type='button'
       onClick={props.handleClick}>
       {props.isBingoed ? 'Play Again' : 'Restart Game'}
-    </div>
+    </button>
   );
 }
 

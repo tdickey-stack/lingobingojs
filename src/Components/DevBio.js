@@ -1,51 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Card from 'react-bootstrap/Card';
-import Col from 'react-bootstrap/Col';
-import CardHeader from 'react-bootstrap/esm/CardHeader';
-import LinkedinSvg from '../about-us/linkedinSvg';
-import GithubSvg from '../about-us/githubSvg';
 
 export default function DevBio(props) {
   return (
-    <Col className='dev-bio-column' >
-      <Card className='text-center mb-3 themed-text' data-theme={props.dataTheme}>
-        <CardHeader>
-          <Card.Title>
-            {props.name + ' ' + props.pronouns}
-          </Card.Title>
-          <Card.Img
-            className='fluid'
-            variant='top'
-            src={props.img}
-            alt={'Photo of ' + props.name}
-          />
-        </CardHeader>
-        <Card.Text
-          className='m-2 p-2'
-        >
-          {props.bio}
-        </Card.Text>
-        <span>
-          <Card.Link
-            className='mx-auto my-1 themed-hyperlink enable-pointer'
-            data-theme={props.dataTheme}
-            href={props.linkedin}
-          >
-            <LinkedinSvg name={props.name}/>
-            LinkedIn
-          </Card.Link>
-          <Card.Link
-            className='mx-auto my-1 themed-hyperlink enable-pointer '
-            data-theme={props.dataTheme}
-            href={props.github}
-          >
-            <GithubSvg name={props.name}/>
-            GitHub
-          </Card.Link>
-        </span>
-      </Card>
-    </Col>
+    <article className='profile-card' data-theme={props.dataTheme}>
+      <div className='profile-heading'>
+        <img src={props.img} alt={`Portrait of ${props.name}`} />
+        <div>
+          <h2>{props.name}</h2>
+          <span>{props.pronouns}</span>
+        </div>
+      </div>
+      <p>{props.bio}</p>
+      <div className='profile-links'>
+        <a className='button button-secondary' href={props.linkedin}>LinkedIn</a>
+        <a className='button button-secondary' href={props.github}>GitHub</a>
+      </div>
+    </article>
   );
 }
 

@@ -4,16 +4,21 @@ import WordTile from './WordTile.js';
 
 export default function DauberLayer(props) {
   return (
-    <div
-      className={props.styleClass + ' dauber-layer enable-pointer highlight-tile'}
+    <button
+      className={`bingo-square ${props.styleClass} ${props.isFree ? 'is-free' : ''}`}
       data-theme={props.dataTheme}
       onClick={props.handleTileClick}
       id={props.id}
+      type='button'
+      aria-pressed={props.styleClass === 'is-selected'}
+      aria-label={props.isFree ? 'Free space, already marked' : `${props.word || 'Loading phrase'}, ${props.styleClass === 'is-selected' ? 'marked' : 'not marked'}`}
+      disabled={props.isFree || !props.word}
     >
       <WordTile
         word={props.word}
       />
-    </div>
+      <span className='square-check' aria-hidden='true'>✓</span>
+    </button>
   );
 }
 DauberLayer.propTypes = {
@@ -21,5 +26,6 @@ DauberLayer.propTypes = {
   styleClass: PropTypes.string,
   dataTheme: PropTypes.string,
   handleTileClick: PropTypes.func,
-  id: PropTypes.number
+  id: PropTypes.number,
+  isFree: PropTypes.bool
 };

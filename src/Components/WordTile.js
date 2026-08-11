@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 
 export default function WordTile(props) {
   return (
-    <div className='enable-pointer'>
+    <span className='square-label'>
       {props.word}
-    </div>
+    </span>
   );
 }
 WordTile.propTypes = {

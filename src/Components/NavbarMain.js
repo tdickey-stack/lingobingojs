@@ -1,81 +1,44 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 export default function NavbarMain(props) {
-
-  const[expanded, setExpanded] = useState(false);
-
-  const [windowWidth, setWindowWidth] = useState(getWindowWidth());
-
-  function getWindowWidth() {
-    const {innerWidth} = window;
-    return innerWidth;
-  }
-
-  useEffect(() => {
-    function handleWindowResize() {
-      setWindowWidth(getWindowWidth());
-    }
-    window.addEventListener('resize', handleWindowResize);
-    return () => {
-      window.removeEventListener('resize', handleWindowResize);
-    };
-  }, []);
-
-  const activeFunc = ({isActive}) =>{
-    if(!isActive){
-      return 'lb-main-nav-link';
-    }
-    else{
-      return 'lb-main-nav-link lb-main-nav-link-active';
-    }
-  };
-
-  const toggle = () => {
-    setExpanded((isExpanded)=> windowWidth <= 586 ? !isExpanded : isExpanded );
-  };
+  const activeClass = ({isActive}) => (
+    isActive ? 'app-nav-link is-active' : 'app-nav-link'
+  );
 
   return (
-    <Navbar
-      bg="dark"
-      variant="dark"
-      expand="sm"
-      className='round-top-edges'
-      id='lb-main-navbar'
-      expanded={expanded}
-    >
-      <Container>
-        <NavLink to="../">
-          <Navbar.Brand>
-            <img
-              src='/lingo-bingo-logo-bravo-67-40.png'
-              alt="Click to return to LingoBingo home page"
-              width={'67px'}
-              height={'40px'}
-            />
-          </Navbar.Brand>
+    <header className='app-header'>
+      <div className='app-header-inner'>
+        <NavLink className='app-brand' to='/'>
+          <span className='app-brand-mark' aria-hidden='true'>LB</span>
+          <span className='app-brand-name'>
+            <strong>Lingo</strong><b>Bingo</b>
+          </span>
         </NavLink>
-        <img src='/icons8-brightness-32.png' alt="Click to switch themes" className='me-auto enable-pointer' onClick={props.handleSwapTheme()}></img>
-        <div>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggle}/>
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav>
-              <NavLink onClick={toggle} className={activeFunc} to="/" end>Home</NavLink>
-              <NavLink onClick={toggle} className={activeFunc} to="../about">About Us</NavLink>
-              <NavLink onClick={toggle} className={activeFunc} to="../play">Play LingoBingo</NavLink>
-            </Nav>
-          </Navbar.Collapse>
-        </div>
-      </Container>
-    </Navbar>
+
+        <nav className='app-nav' aria-label='Primary navigation'>
+          <NavLink className={activeClass} to='/' end>Home</NavLink>
+          <NavLink className={activeClass} to='/create'>Create</NavLink>
+          <NavLink className={activeClass} to='/play'>Play</NavLink>
+          <NavLink className={activeClass} to='/about'>About</NavLink>
+        </nav>
+
+        <button
+          className='theme-toggle'
+          type='button'
+          onClick={props.handleSwapTheme}
+          aria-label={`Switch to ${props.theme === 'dark' ? 'light' : 'dark'} theme`}
+          title={`Switch to ${props.theme === 'dark' ? 'light' : 'dark'} theme`}
+        >
+          <span aria-hidden='true'>{props.theme === 'dark' ? '☀' : '☾'}</span>
+        </button>
+      </div>
+    </header>
   );
 }
 
 NavbarMain.propTypes = {
-  handleSwapTheme: PropTypes.func
+  handleSwapTheme: PropTypes.func.isRequired,
+  theme: PropTypes.string.isRequired
 };

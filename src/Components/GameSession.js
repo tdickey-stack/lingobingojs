@@ -1,24 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Gameboard from './Gameboard.js';
 import randomGen from '../funcLib/RandomGen.js';
 import wordProcessor from '../funcLib/WordProcessor.js';
 import wordImporter from '../funcLib/WordImporter.js';
 import PlayAgainButton from './PlayAgainButton.js';
-import { Col, Container, Row } from 'react-bootstrap';
 import checkForBingo from '../funcLib/CheckForBingo';
-import { useOutletContext, useParams } from 'react-router-dom';
+import { Link, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+
+function getStartingTiles() {
+  const tiles = Array(25).fill(false);
+  tiles[12] = true;
+  return tiles;
+}
 
 export default function GameSession() {
   const [moves, setMoves] = useState(0);
   const [isBingoed, setBingoed] = useState(false);
-  const defaultDauberedTiles = [];
-  defaultDauberedTiles[12] = true;
-  const [dauberedTiles, setDauberedTiles] = useState(defaultDauberedTiles);
-  const [gamesStarted, setGamesStarted] = useState([1]);
+  const [dauberedTiles, setDauberedTiles] = useState(getStartingTiles);
+  const [gamesStarted, setGamesStarted] = useState(1);
   const [randWords, setRandWords] = useState([]);
   let { gameboardId } = useParams();
+  const [searchParams] = useSearchParams();
   const [theme] = useOutletContext();
+
+  const gameTitle = searchParams.get('title')?.trim() || 'Lingo Bingo';
+  const customWords = useMemo(() => {
+    try {
+      const phrases = JSON.parse(searchParams.get('phrases') || '[]');
+      return Array.isArray(phrases) && phrases.length === 24
+        ? phrases.filter((phrase) => typeof phrase === 'string')
+        : [];
+    } catch {
+      return [];
+    }
+  }, [searchParams]);
 
   function handleTileClick(e) {
     let id = e.currentTarget.id;
@@ -28,22 +44,24 @@ export default function GameSession() {
   }
 
   function dauberTile(id) {
-    const currentDauberedTiles = dauberedTiles;
-    if (currentDauberedTiles[id] !== true) {
-      currentDauberedTiles[id] = true;
-      let moveCount = moves;
-      moveCount++;
-      setMoves(moveCount);
-      setDauberedTiles(currentDauberedTiles);
+    const numericId = Number(id);
+    if (numericId === 12 || dauberedTiles[numericId] === true) {
+      return;
     }
+
+    setDauberedTiles((currentTiles) => {
+      const nextTiles = [...currentTiles];
+      nextTiles[numericId] = true;
+      return nextTiles;
+    });
+    setMoves((currentMoves) => currentMoves + 1);
   }
 
   function restartGame() {
     setMoves(0);
-    setDauberedTiles(defaultDauberedTiles);
-    let gamesStartedCount = gamesStarted;
-    gamesStartedCount++;
-    setGamesStarted(gamesStartedCount);
+    setBingoed(false);
+    setDauberedTiles(getStartingTiles());
+    setGamesStarted((currentCount) => currentCount + 1);
   }
 
   useEffect(() => {
@@ -70,10 +88,12 @@ export default function GameSession() {
         .catch(() => {
           importDefaultWords(randInts);
         });
+    } else if (customWords.length === 24) {
+      setRandWords(wordProcessor(customWords, randInts));
     } else {
       importDefaultWords(randInts);
     }
-  }, [gameboardId, gamesStarted]);
+  }, [customWords, gameboardId, gamesStarted]);
 
   function importDefaultWords(randInts) {
     const words = wordImporter();
@@ -82,34 +102,26 @@ export default function GameSession() {
   }
 
   return (
-    <Container
-      fluid
-      className='main-output-borders themed-background page'
-      id='game-session'
-      data-theme={theme}
-    >
-      <Row>
-        <Col>
-          <Gameboard
-            dataTheme={theme}
-            randwords={randWords}
-            moves={moves}
-            isBingoed={isBingoed}
-            dauberedTiles={dauberedTiles}
-            handleTileClick={(e) => handleTileClick(e)}
-          />
-        </Col>
-      </Row>
-      <Row>
-        <Col className='d-flex justify-content-center'>
-          {/* Center the button */}
+    <section className='page-shell game-page' id='game-session' data-theme={theme}>
+      <div className='game-panel'>
+        <Gameboard
+          dataTheme={theme}
+          gameTitle={gameTitle}
+          randwords={randWords}
+          moves={moves}
+          isBingoed={isBingoed}
+          dauberedTiles={dauberedTiles}
+          handleTileClick={handleTileClick}
+        />
+        <div className='game-actions'>
           <PlayAgainButton
             isBingoed={isBingoed}
-            handleClick={() => restartGame()}
+            handleClick={restartGame}
             dataTheme={theme}
           />
-        </Col>
-      </Row>
-    </Container>
+          <Link className='button button-secondary' to='/create'>Create a game</Link>
+        </div>
+      </div>
+    </section>
   );
 }

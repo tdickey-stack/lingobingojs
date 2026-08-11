@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import NavbarMain from './NavbarMain.js';
-import Container from 'react-bootstrap/Container';
 import '../CSS/root.css';
-import '../CSS/dev-theme.css';
 
 
 export default function Home() {
-  const [theme, setTheme] = React.useState('dark');
-  const swapTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+  const [theme, setTheme] = useState(() => {
+    return window.localStorage.getItem('lingo-bingo-theme') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('lingo-bingo-theme', theme);
+  }, [theme]);
+
+  const swapTheme = () => {
+    setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
-    <Container id='home-component' fluid='sm'>
-      <NavbarMain handleSwapTheme={()=>swapTheme}/>
-      <Outlet context={[theme]}/>
-    </Container>
+    <div className='app-shell' data-theme={theme}>
+      <NavbarMain
+        handleSwapTheme={swapTheme}
+        theme={theme}
+      />
+      <main className='app-main'>
+        <Outlet context={[theme]}/>
+      </main>
+    </div>
   );
 }

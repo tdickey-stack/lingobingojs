@@ -6,7 +6,7 @@ import Home from './Components/Home';
 import GameSession from './Components/GameSession.js';
 import About from './Components/About.js';
 import Description from './Components/Description.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import CreateGame from './Components/CreateGame.js';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -17,6 +17,7 @@ root.render(
         <Route path="/" element={<Home/>}>
           <Route index element={<Description/>} />
           <Route path="about" element = {<About/>}/>
+          <Route path="create" element = {<CreateGame/>}/>
           <Route path="signup" element = {''}/>
           <Route path="login" element = {''}/>
           <Route path="play" element = {<GameSession/>}/>
