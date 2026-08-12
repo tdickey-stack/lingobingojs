@@ -3,9 +3,16 @@ import PropTypes from 'prop-types';
 import WordTile from './WordTile.js';
 
 export default function DauberLayer(props) {
+  const phraseLength = (props.word || '').trim().length;
+  const phraseLengthClass = phraseLength > 36
+    ? 'has-extra-long-label'
+    : phraseLength > 24
+      ? 'has-long-label'
+      : '';
+
   return (
     <button
-      className={`bingo-square ${props.styleClass} ${props.isFree ? 'is-free' : ''}`}
+      className={`bingo-square ${props.styleClass} ${props.isFree ? 'is-free' : ''} ${phraseLengthClass}`.trim()}
       data-theme={props.dataTheme}
       onClick={props.handleTileClick}
       id={props.id}

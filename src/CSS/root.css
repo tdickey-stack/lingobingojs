@@ -812,6 +812,16 @@ p {
   text-wrap: balance;
 }
 
+.bingo-square.has-long-label .square-label {
+  font-size: clamp(0.48rem, 1.45vw, 0.72rem);
+  line-height: 1.1;
+}
+
+.bingo-square.has-extra-long-label .square-label {
+  font-size: clamp(0.44rem, 1.25vw, 0.64rem);
+  line-height: 1.06;
+}
+
 .square-check {
   position: absolute;
   right: 7px;
@@ -1639,6 +1649,21 @@ p {
     line-height: 1.12;
   }
 
+  .bingo-square.has-long-label {
+    padding: 3px;
+  }
+
+  .bingo-square.has-long-label .square-label {
+    font-size: clamp(0.42rem, 2vw, 0.54rem);
+    line-height: 1.07;
+  }
+
+  .bingo-square.has-extra-long-label .square-label {
+    font-size: clamp(0.4rem, 1.95vw, 0.51rem);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+  }
+
   .square-check {
     right: 3px;
     bottom: 3px;
@@ -1727,6 +1752,14 @@ p {
 
   .square-label {
     font-size: 0.45rem;
+  }
+
+  .bingo-square.has-long-label .square-label {
+    font-size: 0.4rem;
+  }
+
+  .bingo-square.has-extra-long-label .square-label {
+    font-size: 0.39rem;
   }
 }
 
