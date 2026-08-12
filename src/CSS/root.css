@@ -169,17 +169,16 @@ textarea:focus-visible {
 }
 
 .app-brand-mark {
-  display: grid;
+  display: block;
   width: 38px;
   height: 38px;
-  place-items: center;
-  border: 1px solid rgba(239, 59, 45, 0.42);
-  border-radius: 12px;
-  background: var(--color-accent-soft);
-  color: var(--color-accent-strong);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
+  flex: 0 0 auto;
+}
+
+.app-brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .app-brand-name {
@@ -785,12 +784,14 @@ p {
     color 180ms ease;
 }
 
-.bingo-square:not(:disabled):hover {
-  z-index: 2;
-  transform: translateY(-2px);
-  border-color: rgba(239, 59, 45, 0.42);
-  background: linear-gradient(155deg, var(--color-surface-raised), var(--color-surface-soft));
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .bingo-square:not(.is-selected):not(:disabled):hover {
+    z-index: 2;
+    transform: translateY(-2px);
+    border-color: rgba(239, 59, 45, 0.42);
+    background: linear-gradient(155deg, var(--color-surface-raised), var(--color-surface-soft));
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .bingo-square:not(:disabled):active {
@@ -1201,6 +1202,138 @@ p {
   font-size: 0.63rem;
 }
 
+.winner-celebration {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  isolation: isolate;
+}
+
+.winner-celebration-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(7, 7, 9, 0.82);
+  backdrop-filter: blur(10px);
+  cursor: default;
+  animation: winnerBackdropIn 240ms ease both;
+}
+
+.winner-celebration-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 430px);
+  padding: clamp(30px, 7vw, 48px);
+  overflow: hidden;
+  border: 1px solid rgba(239, 59, 45, 0.48);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(239, 59, 45, 0.2), transparent 48%),
+    linear-gradient(155deg, var(--color-surface-raised), var(--color-surface));
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.52),
+    0 0 48px rgba(239, 59, 45, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  text-align: center;
+  animation: winnerModalIn 520ms var(--ease) both;
+}
+
+:root[data-theme='light'] .winner-celebration-card {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(239, 59, 45, 0.16), transparent 48%),
+    #fff;
+}
+
+.winner-celebration-icon {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 22px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 24px;
+  background: linear-gradient(145deg, #ef3b2d, #a52720);
+  box-shadow: 0 14px 36px rgba(239, 59, 45, 0.34);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 900;
+  transform: rotate(-5deg);
+}
+
+.winner-celebration-card h2 {
+  margin: 7px 0 10px;
+  color: var(--color-text-strong);
+  font-size: clamp(3rem, 13vw, 5.25rem);
+  letter-spacing: -0.075em;
+  line-height: 0.92;
+}
+
+.winner-celebration-card p {
+  margin: 18px 0 5px;
+  color: var(--color-text);
+  font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+}
+
+.winner-celebration-card p strong {
+  color: var(--color-accent-strong);
+  font-weight: 850;
+}
+
+.winner-celebration-note {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.winner-celebration-action {
+  width: 100%;
+  margin-top: 26px;
+}
+
+.confetti-field {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  width: 9px;
+  height: 16px;
+  border-radius: 3px;
+  opacity: 0;
+  animation: confettiBurst 1.65s cubic-bezier(0.12, 0.6, 0.28, 1) var(--confetti-delay) both;
+}
+
+.confetti-piece:nth-child(3n) {
+  width: 13px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.confetti-piece:nth-child(4n) {
+  width: 7px;
+  height: 20px;
+}
+
+.confetti-color-0 { background: #ef3b2d; }
+.confetti-color-1 { background: #fff; }
+.confetti-color-2 { background: #f4bd50; }
+.confetti-color-3 { background: #6eb6ff; }
+.confetti-color-4 { background: #f18ca5; }
+
 .winner-banner {
   display: flex;
   align-items: center;
@@ -1455,6 +1588,39 @@ p {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes winnerBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes winnerModalIn {
+  0% { opacity: 0; transform: translateY(22px) scale(0.82) rotate(-1deg); }
+  62% { opacity: 1; transform: translateY(-5px) scale(1.025) rotate(0.4deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes confettiBurst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(0);
+  }
+  10% { opacity: 1; }
+  45% {
+    opacity: 1;
+    transform:
+      translate(calc(-50% + var(--confetti-mid-x)), calc(-50% + var(--confetti-burst-y)))
+      scale(1)
+      rotate(var(--confetti-mid-rotation));
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(calc(-50% + var(--confetti-x)), calc(-50% + var(--confetti-fall-y)))
+      scale(0.82)
+      rotate(var(--confetti-rotation));
+  }
+}
+
 @keyframes waitingPulse {
   0%, 100% { opacity: 0.35; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1); }
@@ -1601,6 +1767,27 @@ p {
   .room-setup-panel {
     padding: 24px 18px;
     border-radius: 20px;
+  }
+
+  .winner-celebration {
+    padding: 14px;
+  }
+
+  .winner-celebration-card {
+    padding: 30px 22px 24px;
+    border-radius: 22px;
+  }
+
+  .winner-celebration-icon {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 18px;
+    border-radius: 20px;
+    font-size: 1.7rem;
+  }
+
+  .winner-celebration-card h2 {
+    font-size: clamp(3rem, 18vw, 4.4rem);
   }
 
   .player-list {
@@ -1764,6 +1951,10 @@ p {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .confetti-field {
+    display: none;
+  }
+
   *,
   *::before,
   *::after {

@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom';
 import GameSession from '../Components/GameSession';
 
@@ -69,5 +69,15 @@ describe('GameSession stored games', () => {
 
     expect(await screen.findByRole('heading', { name: 'Legacy Team Game' })).not.toBeNull();
     expect(screen.getByLabelText('Lingo Bingo board')).not.toBeNull();
+  });
+
+  test('shows the winner celebration on a single-player board', async () => {
+    renderGame('/play');
+
+    const board = await screen.findByLabelText('Lingo Bingo board');
+    const tiles = within(board).getAllByRole('button');
+    tiles.slice(0, 5).forEach((tile) => fireEvent.click(tile));
+
+    expect((await screen.findByRole('dialog')).textContent).toContain('You got Bingo!');
   });
 });

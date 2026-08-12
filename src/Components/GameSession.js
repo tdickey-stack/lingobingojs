@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Gameboard from './Gameboard.js';
+import WinnerCelebration from './WinnerCelebration.js';
 import randomGen from '../funcLib/RandomGen.js';
 import wordProcessor from '../funcLib/WordProcessor.js';
 import wordImporter from '../funcLib/WordImporter.js';
@@ -24,6 +25,7 @@ export default function GameSession() {
   const [gameTitle, setGameTitle] = useState('Lingo Bingo');
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [showWinnerCelebration, setShowWinnerCelebration] = useState(false);
   const { gameId, gameboardId } = useParams();
   const [searchParams] = useSearchParams();
   const [theme] = useOutletContext();
@@ -73,6 +75,7 @@ export default function GameSession() {
   function restartGame() {
     setMoves(0);
     setBingoed(false);
+    setShowWinnerCelebration(false);
     setDauberedTiles(getStartingTiles());
     setGamesStarted((currentCount) => currentCount + 1);
   }
@@ -80,6 +83,14 @@ export default function GameSession() {
   useEffect(() => {
     setBingoed(checkForBingo(dauberedTiles, moves));
   }, [dauberedTiles, moves]);
+
+  useEffect(() => {
+    if (isBingoed) {
+      setShowWinnerCelebration(true);
+    }
+  }, [isBingoed]);
+
+  const closeWinnerCelebration = useCallback(() => setShowWinnerCelebration(false), []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -194,6 +205,13 @@ export default function GameSession() {
           </div>
         ) : (
           <>
+            {showWinnerCelebration && (
+              <WinnerCelebration
+                winnerName='You'
+                note='Great job! Restart whenever you’re ready for another board.'
+                onClose={closeWinnerCelebration}
+              />
+            )}
             <Gameboard
               dataTheme={theme}
               gameTitle={gameTitle}

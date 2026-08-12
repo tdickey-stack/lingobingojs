@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Gameboard from './Gameboard';
+import WinnerCelebration from './WinnerCelebration';
 import checkForBingo from '../funcLib/CheckForBingo';
 import randomGen from '../funcLib/RandomGen';
 import wordProcessor from '../funcLib/WordProcessor';
@@ -19,9 +20,18 @@ export default function RoomGame({ roomState, playerName, theme, onBingo }) {
   const [dauberedTiles, setDauberedTiles] = useState(getStartingTiles);
   const [randWords, setRandWords] = useState([]);
   const [countdown, setCountdown] = useState(() => Math.max(1, Math.ceil((roomState.startedAt - Date.now()) / 1000)));
+  const [celebratedWinner, setCelebratedWinner] = useState(null);
   const announcedBingo = useRef(false);
   const phrases = useRef(roomState.game.phrases);
   const latestWinner = roomState.winners[roomState.winners.length - 1];
+
+  useEffect(() => {
+    if (latestWinner) {
+      setCelebratedWinner(latestWinner);
+    }
+  }, [latestWinner]);
+
+  const closeCelebration = useCallback(() => setCelebratedWinner(null), []);
 
   useEffect(() => {
     setRandWords(wordProcessor(phrases.current, randomGen(24)));
@@ -78,6 +88,13 @@ export default function RoomGame({ roomState, playerName, theme, onBingo }) {
 
   return (
     <>
+      {celebratedWinner && (
+        <WinnerCelebration
+          winnerName={celebratedWinner.name}
+          onClose={closeCelebration}
+        />
+      )}
+
       <div className='live-room-bar'>
         <div>
           <span className='connection-dot'>Live</span>

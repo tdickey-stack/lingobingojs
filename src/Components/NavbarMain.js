@@ -11,9 +11,11 @@ export default function NavbarMain(props) {
     <header className='app-header'>
       <div className='app-header-inner'>
         <NavLink className='app-brand' to='/'>
-          <span className='app-brand-mark' aria-hidden='true'>LB</span>
+          <span className='app-brand-mark' aria-hidden='true'>
+            <img src={`${process.env.PUBLIC_URL}/favicon.svg`} alt='' />
+          </span>
           <span className='app-brand-name'>
-            <strong>Lingo</strong><b>Bingo</b>
+            <strong>CrossPointe</strong><b>Bingo</b>
           </span>
         </NavLink>
 
