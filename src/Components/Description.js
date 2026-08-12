@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import Footer from './Footer.js';
+import JoinRoomForm from './JoinRoomForm.js';
 
 export default function Description() {
   const [theme] = useOutletContext();
@@ -28,6 +29,15 @@ export default function Description() {
         </div>
       </section>
 
+      <section className='join-room-panel' id='join-room' aria-labelledby='join-room-title'>
+        <div className='join-room-copy'>
+          <span className='eyebrow'>Already invited?</span>
+          <h2 id='join-room-title'>Join a live room.</h2>
+          <p>Enter the code from your host to join the lobby, choose your name, and start with everyone else.</p>
+        </div>
+        <JoinRoomForm compact />
+      </section>
+
       <section className='content-section' aria-labelledby='how-it-works'>
         <div className='section-heading'>
           <span className='eyebrow'>How it works</span>
@@ -43,12 +53,12 @@ export default function Description() {
           <article className='info-card'>
             <span className='step-number'>02</span>
             <h3>Share one link</h3>
-            <p>Send the game link to your group. Each person gets a shuffled board.</p>
+            <p>Share a game link for casual play, or bring everyone into one live room.</p>
           </article>
           <article className='info-card'>
             <span className='step-number'>03</span>
             <h3>Play together</h3>
-            <p>Tap phrases as they come up. Five marked squares in a row wins.</p>
+            <p>Start together and see a room announcement whenever someone gets Bingo.</p>
           </article>
         </div>
       </section>

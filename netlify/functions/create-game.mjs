@@ -2,6 +2,7 @@ import { getStore } from '@netlify/blobs';
 import {
   GAME_STORE_NAME,
   createGameId,
+  createGameRecord,
   validateGamePayload,
 } from '../lib/game-record.mjs';
 
@@ -42,15 +43,14 @@ export default async function createGame(request) {
   }
 
   const store = getStore({ name: GAME_STORE_NAME, consistency: 'strong' });
-  const record = {
-    version: 1,
-    ...validation.value,
-    createdAt: new Date().toISOString(),
-  };
+  const record = createGameRecord(validation.value);
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const id = createGameId();
-    const result = await store.setJSON(id, record, { onlyIfNew: true });
+    const result = await store.setJSON(id, record, {
+      onlyIfNew: true,
+      metadata: { expiresAt: record.expiresAt },
+    });
     if (result.modified) {
       return jsonResponse({ id, path: `/g/${id}` }, 201);
     }

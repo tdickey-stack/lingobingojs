@@ -7,6 +7,8 @@ import GameSession from './Components/GameSession.js';
 import About from './Components/About.js';
 import Description from './Components/Description.js';
 import CreateGame from './Components/CreateGame.js';
+import HostRoom from './Components/HostRoom.js';
+import JoinRoom from './Components/JoinRoom.js';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -22,6 +24,8 @@ root.render(
           <Route path="login" element = {''}/>
           <Route path="play" element = {<GameSession/>}/>
           <Route path="g/:gameId" element = {<GameSession/>}/>
+          <Route path="host/:gameId" element = {<HostRoom/>}/>
+          <Route path="room/:roomCode" element = {<JoinRoom/>}/>
           <Route path="play/:gameboardId" element = {<GameSession/>}/>
           <Route path="play/:gameboardId/:param2" element = {<GameSession/>}/>
         </Route>

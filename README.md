@@ -176,6 +176,14 @@ Open the URL Netlify Dev prints, normally `http://localhost:8888`. Running `npm 
 
 The repository's `netlify.toml` sets the production build, publish directory, and Functions directory. Netlify automatically supplies the site context needed by `@netlify/blobs`; no database credentials or application environment variables are required. Game records are unlisted and use random IDs, but anyone with a game link can retrieve its title and phrases, so do not store private information in a game.
 
+Saved games expire 90 days after creation. New records include an explicit expiration timestamp, older records use their existing creation timestamp, and the `cleanup-expired-games` scheduled function removes expired Blob records once per day. Retrieving an expired game also deletes it immediately and returns an expiration message.
+
+### Live Multiplayer Rooms
+
+Saved games can also be launched as temporary live rooms. The host selects **Host live game**, enters a name, and receives a six-character room code and share link. Players can follow that link or enter the code in the **Join a live room** panel on the homepage. The host sees everyone in the lobby and starts all connected boards together. When a player's existing board logic detects Bingo, every connected player receives a room announcement with that player's name.
+
+Live rooms use [PeerJS](https://peerjs.com/) and encrypted WebRTC data connections rather than a persistent game server. The host's browser acts as the room coordinator, so the host must leave the tab open for the entire game. Rooms are intentionally temporary, do not require accounts, and stop accepting new players after the host starts. Netlify Blobs continues to store only the reusable game title and phrases.
+
 Run both test groups before deployment:
 
 ```sh
@@ -228,6 +236,8 @@ In the future we could change our minds and would then update this section.
 Thank-you to [GitHub](https://github.com) for providing collaborative tools for software development with free-of-charge options for us little devs. :smiley:
 
 Thank you [Icons8](https://icons8.com) for making open-source SVG and PNG Icons available to the masses.
+
+Live multiplayer connections are powered by [PeerJS](https://github.com/peers/peerjs), available under the MIT License.
 
 ### Lead Developers
 

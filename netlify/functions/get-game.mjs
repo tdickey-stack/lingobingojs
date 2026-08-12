@@ -2,6 +2,7 @@ import { getStore } from '@netlify/blobs';
 import {
   GAME_ID_PATTERN,
   GAME_STORE_NAME,
+  isGameExpired,
   validateGamePayload,
 } from '../lib/game-record.mjs';
 
@@ -28,6 +29,11 @@ export default async function getGame(request, context) {
   const record = await store.get(gameId, { type: 'json' });
   if (!record) {
     return jsonResponse({ error: 'This game could not be found.' }, 404);
+  }
+
+  if (isGameExpired(record)) {
+    await store.delete(gameId);
+    return jsonResponse({ error: 'This saved game has expired.' }, 410);
   }
 
   const validation = validateGamePayload(record);

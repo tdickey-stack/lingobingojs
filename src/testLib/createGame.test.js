@@ -51,7 +51,7 @@ describe('CreateGame', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create game link' }));
 
-    const startLink = await screen.findByRole('link', { name: 'Start this game' });
+    const startLink = await screen.findByRole('link', { name: 'Play solo' });
     const url = new URL(startLink.getAttribute('href'));
     expect(url.pathname).toBe('/g/AbCdEf123456');
     expect(url.search).toBe('');
@@ -60,6 +60,7 @@ describe('CreateGame', () => {
       body: JSON.stringify({ title: 'Team Night', phrases }),
     }));
     expect(screen.getByText('24 / 24')).not.toBeNull();
+    expect(screen.getByRole('link', { name: 'Host a live room' }).getAttribute('href')).toBe('/host/AbCdEf123456');
   });
 
   test('shows a server error instead of creating a broken link', async () => {
@@ -75,6 +76,6 @@ describe('CreateGame', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create game link' }));
 
     expect((await screen.findByRole('alert')).textContent).toContain('Game storage is temporarily unavailable.');
-    expect(screen.queryByRole('link', { name: 'Start this game' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Play solo' })).toBeNull();
   });
 });

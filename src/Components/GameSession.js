@@ -209,6 +209,7 @@ export default function GameSession() {
                 handleClick={restartGame}
                 dataTheme={theme}
               />
+              {gameId && <Link className='button button-primary' to={`/host/${gameId}`}>Host live game</Link>}
               <Link className='button button-secondary' to='/create'>Create a game</Link>
             </div>
           </>

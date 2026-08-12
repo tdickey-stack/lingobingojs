@@ -13,6 +13,7 @@ export default function CreateGame() {
   const [phraseText, setPhraseText] = useState('');
   const [error, setError] = useState('');
   const [shareUrl, setShareUrl] = useState('');
+  const [createdGameId, setCreatedGameId] = useState('');
   const [copyState, setCopyState] = useState('Copy link');
   const [isCreating, setIsCreating] = useState(false);
   const phrases = useMemo(() => normalizePhraseText(phraseText), [phraseText]);
@@ -31,11 +32,13 @@ export default function CreateGame() {
     if (validationError) {
       setError(validationError);
       setShareUrl('');
+      setCreatedGameId('');
       return;
     }
 
     setError('');
     setShareUrl('');
+    setCreatedGameId('');
     setCopyState('Copy link');
     setIsCreating(true);
 
@@ -55,6 +58,7 @@ export default function CreateGame() {
       }
 
       setShareUrl(new URL(result.path, window.location.origin).toString());
+      setCreatedGameId(result.id || result.path.split('/').pop());
     } catch (requestError) {
       const localHint = window.location.hostname === 'localhost'
         ? ' Run this project with Netlify Dev to test short links locally.'
@@ -139,7 +143,10 @@ export default function CreateGame() {
               <input id='share-url' value={shareUrl} readOnly onFocus={(event) => event.target.select()} />
               <button className='button button-secondary' type='button' onClick={copyLink}>{copyState}</button>
             </div>
-            <a className='button button-primary' href={shareUrl}>Start this game</a>
+            <div className='share-actions'>
+              <Link className='button button-primary' to={`/host/${createdGameId}`}>Host a live room</Link>
+              <a className='button button-secondary' href={shareUrl}>Play solo</a>
+            </div>
           </div>
         </section>
       )}
