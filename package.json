@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@netlify/blobs": "^10.7.12",
     "axios": "^1.3.1",
     "bootstrap": "^5.2.0",
     "prop-types": "^15.8.1",
@@ -16,6 +17,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "jest",
+    "test:netlify": "node --test netlify/lib/*.test.mjs",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

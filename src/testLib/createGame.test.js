@@ -22,6 +22,11 @@ function renderCreateGame() {
 }
 
 describe('CreateGame', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    delete global.fetch;
+  });
+
   test('shows clear validation for an empty game', () => {
     renderCreateGame();
 
@@ -30,7 +35,11 @@ describe('CreateGame', () => {
     expect(screen.getByRole('alert').textContent).toContain('Give your game a short title.');
   });
 
-  test('creates a shareable play link for 24 unique phrases', () => {
+  test('creates a short stored-game link for 24 unique phrases', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: 'AbCdEf123456', path: '/g/AbCdEf123456' }),
+    });
     renderCreateGame();
     const phrases = Array.from({ length: 24 }, (_, index) => `Phrase ${index + 1}`);
 
@@ -42,11 +51,30 @@ describe('CreateGame', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create game link' }));
 
-    const startLink = screen.getByRole('link', { name: 'Start this game' });
+    const startLink = await screen.findByRole('link', { name: 'Start this game' });
     const url = new URL(startLink.getAttribute('href'));
-    expect(url.pathname).toBe('/play');
-    expect(url.searchParams.get('title')).toBe('Team Night');
-    expect(JSON.parse(url.searchParams.get('phrases'))).toEqual(phrases);
+    expect(url.pathname).toBe('/g/AbCdEf123456');
+    expect(url.search).toBe('');
+    expect(global.fetch).toHaveBeenCalledWith('/api/games', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ title: 'Team Night', phrases }),
+    }));
     expect(screen.getByText('24 / 24')).not.toBeNull();
+  });
+
+  test('shows a server error instead of creating a broken link', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ error: 'Game storage is temporarily unavailable.' }),
+    });
+    renderCreateGame();
+    const phrases = Array.from({ length: 24 }, (_, index) => `Phrase ${index + 1}`);
+
+    fireEvent.change(screen.getByLabelText('Game title'), { target: { value: 'Team Night' } });
+    fireEvent.change(screen.getByLabelText('Phrases'), { target: { value: phrases.join('\n') } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create game link' }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain('Game storage is temporarily unavailable.');
+    expect(screen.queryByRole('link', { name: 'Start this game' })).toBeNull();
   });
 });

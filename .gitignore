@@ -455,6 +455,8 @@ $RECYCLE.BIN/
 
 # production
 /build
+.netlify/
+deno.lock
 
 # misc
 .DS_Store

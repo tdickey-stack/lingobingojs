@@ -162,6 +162,28 @@ This project is being developed in Linux-based environments. You can choose to b
 5. Run `npm test` to execute Jest tests.
 6. Run `npm start` to run a local, development version of the website.
 
+### Short Game Links and Netlify Blobs
+
+This fork stores custom games in Netlify Blobs and shares them with compact URLs such as `/g/AbCdEf123456`. The title and phrases are no longer placed in the URL. Older `/play?title=...&phrases=...` links remain supported.
+
+Use Netlify Dev when testing game creation locally so the React app, Functions, and local Blobs storage run together:
+
+```sh
+npx netlify dev
+```
+
+Open the URL Netlify Dev prints, normally `http://localhost:8888`. Running `npm start` still works for frontend-only development, but its development server does not provide the `/api/games` Functions used to create and retrieve short links.
+
+The repository's `netlify.toml` sets the production build, publish directory, and Functions directory. Netlify automatically supplies the site context needed by `@netlify/blobs`; no database credentials or application environment variables are required. Game records are unlisted and use random IDs, but anyone with a game link can retrieve its title and phrases, so do not store private information in a game.
+
+Run both test groups before deployment:
+
+```sh
+npm test -- --runInBand
+npm run test:netlify
+npm run build
+```
+
 See [reactapp readme](./README-reactapp.md) and [reactjs](https://reactjs.org/) for details on cloning, developing, testing, and running react webapps in production vs. development.
 
 ### Dev and Test Usage

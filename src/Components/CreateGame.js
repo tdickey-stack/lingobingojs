@@ -1,15 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-
-const REQUIRED_PHRASE_COUNT = 24;
-const MAX_PHRASE_LENGTH = 48;
-
-function normalizePhrases(value) {
-  return value
-    .split('\n')
-    .map((phrase) => phrase.trim())
-    .filter(Boolean);
-}
+import {
+  MAX_TITLE_LENGTH,
+  REQUIRED_PHRASE_COUNT,
+  normalizePhraseText,
+  validateGamePayload,
+} from '../funcLib/GamePayload';
 
 export default function CreateGame() {
   const [theme] = useOutletContext();
@@ -18,25 +14,18 @@ export default function CreateGame() {
   const [error, setError] = useState('');
   const [shareUrl, setShareUrl] = useState('');
   const [copyState, setCopyState] = useState('Copy link');
-  const phrases = useMemo(() => normalizePhrases(phraseText), [phraseText]);
+  const [isCreating, setIsCreating] = useState(false);
+  const phrases = useMemo(() => normalizePhraseText(phraseText), [phraseText]);
 
   function validate() {
-    if (!title.trim()) {
-      return 'Give your game a short title.';
-    }
-    if (phrases.length !== REQUIRED_PHRASE_COUNT) {
+    const validationError = validateGamePayload({ title, phrases }).error || '';
+    if (validationError === `Add exactly ${REQUIRED_PHRASE_COUNT} phrases.`) {
       return `Add exactly ${REQUIRED_PHRASE_COUNT} phrases. You currently have ${phrases.length}.`;
     }
-    if (phrases.some((phrase) => phrase.length > MAX_PHRASE_LENGTH)) {
-      return `Keep every phrase to ${MAX_PHRASE_LENGTH} characters or fewer.`;
-    }
-    if (new Set(phrases.map((phrase) => phrase.toLowerCase())).size !== phrases.length) {
-      return 'Each phrase must be unique.';
-    }
-    return '';
+    return validationError;
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const validationError = validate();
     if (validationError) {
@@ -45,13 +34,35 @@ export default function CreateGame() {
       return;
     }
 
-    const params = new URLSearchParams({
-      title: title.trim(),
-      phrases: JSON.stringify(phrases)
-    });
     setError('');
+    setShareUrl('');
     setCopyState('Copy link');
-    setShareUrl(`${window.location.origin}/play?${params.toString()}`);
+    setIsCreating(true);
+
+    try {
+      const response = await fetch('/api/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), phrases }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.error || 'The game could not be saved. Please try again.');
+      }
+      if (typeof result.path !== 'string' || !result.path.startsWith('/g/')) {
+        throw new Error('The game was saved, but its share link was not returned. Please try again.');
+      }
+
+      setShareUrl(new URL(result.path, window.location.origin).toString());
+    } catch (requestError) {
+      const localHint = window.location.hostname === 'localhost'
+        ? ' Run this project with Netlify Dev to test short links locally.'
+        : '';
+      setError(`${requestError.message || 'The game could not be saved.'}${localHint}`);
+    } finally {
+      setIsCreating(false);
+    }
   }
 
   async function copyLink() {
@@ -68,10 +79,10 @@ export default function CreateGame() {
       <div className='page-intro'>
         <span className='eyebrow'>Game builder</span>
         <h1>Create a Lingo Bingo game</h1>
-        <p>Choose a title and add one phrase per line. Your share link opens a freshly shuffled board for every player.</p>
+        <p>Choose a title and add one phrase per line. We’ll save the game and make a short link that opens a freshly shuffled board for every player.</p>
       </div>
 
-      <form className='create-panel' onSubmit={handleSubmit} noValidate>
+      <form className='create-panel' onSubmit={handleSubmit} noValidate aria-busy={isCreating}>
         <div className='field-group'>
           <label htmlFor='game-title'>Game title</label>
           <span className='field-hint'>A clear title helps players know they joined the right game.</span>
@@ -80,7 +91,7 @@ export default function CreateGame() {
             name='game-title'
             type='text'
             value={title}
-            maxLength='80'
+            maxLength={MAX_TITLE_LENGTH}
             placeholder='Sunday Team Gathering'
             onChange={(event) => setTitle(event.target.value)}
           />
@@ -109,7 +120,9 @@ export default function CreateGame() {
         {error && <div className='form-message is-error' role='alert'>{error}</div>}
 
         <div className='form-actions'>
-          <button className='button button-primary' type='submit'>Create game link</button>
+          <button className='button button-primary' type='submit' disabled={isCreating}>
+            {isCreating ? 'Saving game…' : 'Create game link'}
+          </button>
           <Link className='button button-secondary' to='/play'>Preview default game</Link>
         </div>
       </form>

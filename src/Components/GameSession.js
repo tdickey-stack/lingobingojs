@@ -7,6 +7,7 @@ import PlayAgainButton from './PlayAgainButton.js';
 import checkForBingo from '../funcLib/CheckForBingo';
 import { Link, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { validateGamePayload } from '../funcLib/GamePayload';
 
 function getStartingTiles() {
   const tiles = Array(25).fill(false);
@@ -20,21 +21,33 @@ export default function GameSession() {
   const [dauberedTiles, setDauberedTiles] = useState(getStartingTiles);
   const [gamesStarted, setGamesStarted] = useState(1);
   const [randWords, setRandWords] = useState([]);
-  let { gameboardId } = useParams();
+  const [gameTitle, setGameTitle] = useState('Lingo Bingo');
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const { gameId, gameboardId } = useParams();
   const [searchParams] = useSearchParams();
   const [theme] = useOutletContext();
 
-  const gameTitle = searchParams.get('title')?.trim() || 'Lingo Bingo';
-  const customWords = useMemo(() => {
-    try {
-      const phrases = JSON.parse(searchParams.get('phrases') || '[]');
-      return Array.isArray(phrases) && phrases.length === 24
-        ? phrases.filter((phrase) => typeof phrase === 'string')
-        : [];
-    } catch {
-      return [];
+  const legacyTitle = searchParams.get('title');
+  const legacyPhrases = searchParams.get('phrases');
+  const legacyGame = useMemo(() => {
+    const isPresent = legacyTitle !== null || legacyPhrases !== null;
+    if (!isPresent) {
+      return { isPresent: false };
     }
-  }, [searchParams]);
+
+    try {
+      const validation = validateGamePayload({
+        title: legacyTitle,
+        phrases: JSON.parse(legacyPhrases || '[]'),
+      });
+      return validation.error
+        ? { isPresent: true, error: validation.error }
+        : { isPresent: true, ...validation.value };
+    } catch {
+      return { isPresent: true, error: 'The phrase list could not be read.' };
+    }
+  }, [legacyPhrases, legacyTitle]);
 
   function handleTileClick(e) {
     let id = e.currentTarget.id;
@@ -69,31 +82,88 @@ export default function GameSession() {
   }, [dauberedTiles, moves]);
 
   useEffect(() => {
-    const randInts = randomGen(24);
+    let isCancelled = false;
 
-    if (gameboardId !== undefined) {
-      const urlWithId = `${process.env.REACT_APP_GAMEBOARD_URI}${gameboardId}`;
-      const apiServer = process.env.REACT_APP_API_SERVER;
+    async function loadGame() {
+      const randInts = randomGen(24);
+      setIsLoading(true);
+      setLoadError('');
+      setRandWords([]);
 
-      const config = {
-        method: 'get',
-        baseURL: apiServer,
-        url: urlWithId,
-      };
+      try {
+        if (gameId !== undefined) {
+          const response = await fetch(`/api/games/${encodeURIComponent(gameId)}`, {
+            headers: { Accept: 'application/json' },
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.error || 'This game could not be loaded.');
+          }
 
-      axios(config)
-        .then((res) => res.data)
-        .then((words) => wordProcessor(words, randInts))
-        .then((processedWords) => setRandWords(processedWords))
-        .catch(() => {
+          const validation = validateGamePayload(result);
+          if (validation.error) {
+            throw new Error('This saved game is incomplete or invalid.');
+          }
+          if (!isCancelled) {
+            setGameTitle(validation.value.title);
+            setRandWords(wordProcessor(validation.value.phrases, randInts));
+          }
+          return;
+        }
+
+        if (gameboardId !== undefined) {
+          const config = {
+            method: 'get',
+            baseURL: process.env.REACT_APP_API_SERVER,
+            url: `${process.env.REACT_APP_GAMEBOARD_URI}${gameboardId}`,
+          };
+
+          try {
+            const response = await axios(config);
+            if (!isCancelled) {
+              setGameTitle('Lingo Bingo');
+              setRandWords(wordProcessor(response.data, randInts));
+            }
+          } catch {
+            if (!isCancelled) {
+              setGameTitle('Lingo Bingo');
+              importDefaultWords(randInts);
+            }
+          }
+          return;
+        }
+
+        if (legacyGame.isPresent) {
+          if (legacyGame.error) {
+            throw new Error(`This shared game link is incomplete or invalid. ${legacyGame.error}`);
+          }
+          if (!isCancelled) {
+            setGameTitle(legacyGame.title);
+            setRandWords(wordProcessor(legacyGame.phrases, randInts));
+          }
+          return;
+        }
+
+        if (!isCancelled) {
+          setGameTitle('Lingo Bingo');
           importDefaultWords(randInts);
-        });
-    } else if (customWords.length === 24) {
-      setRandWords(wordProcessor(customWords, randInts));
-    } else {
-      importDefaultWords(randInts);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setLoadError(error.message || 'This game could not be loaded.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
     }
-  }, [customWords, gameboardId, gamesStarted]);
+
+    loadGame();
+    return () => {
+      isCancelled = true;
+    };
+  }, [gameId, gameboardId, gamesStarted, legacyGame]);
 
   function importDefaultWords(randInts) {
     const words = wordImporter();
@@ -104,23 +174,45 @@ export default function GameSession() {
   return (
     <section className='page-shell game-page' id='game-session' data-theme={theme}>
       <div className='game-panel'>
-        <Gameboard
-          dataTheme={theme}
-          gameTitle={gameTitle}
-          randwords={randWords}
-          moves={moves}
-          isBingoed={isBingoed}
-          dauberedTiles={dauberedTiles}
-          handleTileClick={handleTileClick}
-        />
-        <div className='game-actions'>
-          <PlayAgainButton
-            isBingoed={isBingoed}
-            handleClick={restartGame}
-            dataTheme={theme}
-          />
-          <Link className='button button-secondary' to='/create'>Create a game</Link>
-        </div>
+        {isLoading ? (
+          <div className='game-status' role='status' aria-live='polite'>
+            <span className='status-spinner' aria-hidden='true' />
+            <span className='eyebrow'>Just a moment</span>
+            <h1>Loading your game…</h1>
+            <p>We’re getting the board ready for you.</p>
+          </div>
+        ) : loadError ? (
+          <div className='game-status is-error' role='alert'>
+            <span className='status-icon' aria-hidden='true'>!</span>
+            <span className='eyebrow'>Game unavailable</span>
+            <h1>We couldn’t open this board</h1>
+            <p>{loadError}</p>
+            <div className='game-actions'>
+              <Link className='button button-primary' to='/create'>Create a new game</Link>
+              <Link className='button button-secondary' to='/play'>Play the default game</Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Gameboard
+              dataTheme={theme}
+              gameTitle={gameTitle}
+              randwords={randWords}
+              moves={moves}
+              isBingoed={isBingoed}
+              dauberedTiles={dauberedTiles}
+              handleTileClick={handleTileClick}
+            />
+            <div className='game-actions'>
+              <PlayAgainButton
+                isBingoed={isBingoed}
+                handleClick={restartGame}
+                dataTheme={theme}
+              />
+              <Link className='button button-secondary' to='/create'>Create a game</Link>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
