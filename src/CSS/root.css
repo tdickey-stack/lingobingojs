@@ -421,8 +421,7 @@ p {
 
 .hero-actions,
 .form-actions,
-.game-actions,
-.profile-links {
+.game-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -564,8 +563,7 @@ p {
   font-size: clamp(2.15rem, 6vw, 4rem);
 }
 
-.step-grid,
-.profile-grid {
+.step-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -573,7 +571,6 @@ p {
 }
 
 .info-card,
-.profile-card,
 .create-panel,
 .share-panel,
 .game-panel,
@@ -1532,51 +1529,6 @@ p {
   gap: 8px;
 }
 
-/* About */
-.about-page .page-intro {
-  max-width: 760px;
-}
-
-.profile-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.profile-card {
-  padding: 24px;
-  border-radius: var(--radius-lg);
-}
-
-.profile-heading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.profile-heading img {
-  width: 62px;
-  height: 62px;
-  border: 2px solid var(--color-surface);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--color-border-strong);
-  object-fit: cover;
-}
-
-.profile-heading h2 {
-  margin: 0 0 4px;
-  font-size: 1.15rem;
-}
-
-.profile-heading span {
-  color: var(--color-muted);
-  font-size: 0.65rem;
-  font-weight: 650;
-}
-
-.profile-card > p {
-  font-size: 0.78rem;
-}
-
 @keyframes squareSelected {
   0% { transform: scale(0.93); }
   65% { transform: scale(1.025); }
@@ -1904,10 +1856,6 @@ p {
   .copy-control .button,
   .share-copy > .button {
     width: 100%;
-  }
-
-  .profile-grid {
-    grid-template-columns: 1fr;
   }
 
   .app-footer {

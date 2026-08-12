@@ -23,7 +23,6 @@ export default function NavbarMain(props) {
           <NavLink className={activeClass} to='/' end>Home</NavLink>
           <NavLink className={activeClass} to='/create'>Create</NavLink>
           <NavLink className={activeClass} to='/play'>Play</NavLink>
-          <NavLink className={activeClass} to='/about'>About</NavLink>
         </nav>
 
         <button

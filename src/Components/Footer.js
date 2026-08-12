@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 export default function Footer(props) {
   return (
     <footer className='app-footer' data-theme={props.dataTheme}>
-      <span>Lingo Bingo</span>
+      <span>CrossPointe Bingo</span>
       <p>
-        Open source by <a href='https://github.com/EnigmaBay'>EnigmaBay</a> under the{' '}
-        <a href='https://github.com/EnigmaBay/lingobingojs/blob/main/LICENSE'>MIT License</a>.
+        Based on the open-source LingoBingoJS project ·{' '}
+        <a href='https://github.com/tdickey-stack/lingobingojs/blob/main/LICENSE'>MIT License</a>
       </p>
     </footer>
   );
